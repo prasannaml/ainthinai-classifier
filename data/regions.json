@@ -1,0 +1,67 @@
+{
+  "Kurinji": {
+    "tamil": "குறிஞ்சி",
+    "english": "Mountainous Region",
+    "description": "The land of mountains and hills, home to highland tribes. Known for cool climate, rugged terrain, and resilient mountain flora. In ancient Tamil literature, Kurinji represents patience and the union of lovers.",
+    "characteristics": [
+      "High altitude (≥ 1000m)",
+      "Cool climate",
+      "Mountain terrain",
+      "Inland location"
+    ],
+    "color": "#6B46C1",
+    "icon": "⛰️"
+  },
+  "Mullai": {
+    "tamil": "முல்லை",
+    "english": "Forest & Pastoral Region",
+    "description": "The land of forests and pastures, where cowherds and shepherds dwell. Characterized by mid-altitude lands with lush vegetation. In Tamil poetry, Mullai symbolizes patience and waiting for loved ones.",
+    "characteristics": [
+      "Mid-altitude (200-999m)",
+      "Forest cover",
+      "Pastoral lands",
+      "Adequate rainfall"
+    ],
+    "color": "#059669",
+    "icon": "🌲"
+  },
+  "Marudham": {
+    "tamil": "மருதம்",
+    "english": "Agricultural Plains",
+    "description": "The fertile plains enriched by rivers, ideal for agriculture and settlements. The most prosperous of the five regions, known for abundant harvests. Marudham represents contentment and marital happiness in classical Tamil literature.",
+    "characteristics": [
+      "Low elevation (< 200m)",
+      "Fertile soil",
+      "River proximity",
+      "Abundant water"
+    ],
+    "color": "#F59E0B",
+    "icon": "🌾"
+  },
+  "Neithal": {
+    "tamil": "நெய்தல்",
+    "english": "Coastal Region",
+    "description": "The land of seas and coastal areas, where fishermen make their living from the ocean's bounty. Maritime climate with salt-laden winds. In Tamil tradition, Neithal embodies longing and separation.",
+    "characteristics": [
+      "Coastal proximity (≤ 50km)",
+      "Sea-level",
+      "Maritime climate",
+      "Fishing communities"
+    ],
+    "color": "#0EA5E9",
+    "icon": "🌊"
+  },
+  "Paalai": {
+    "tamil": "பாலை",
+    "english": "Arid & Desert Region",
+    "description": "The parched land of deserts and wastelands, characterized by scarcity of water and harsh conditions. In Tamil literature, Paalai represents hardship, separation, and the trials of love.",
+    "characteristics": [
+      "Low rainfall (< 250mm/year)",
+      "Arid climate",
+      "Desert terrain",
+      "Water scarcity"
+    ],
+    "color": "#D97706",
+    "icon": "🏜️"
+  }
+}

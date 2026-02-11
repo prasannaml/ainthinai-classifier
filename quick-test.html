@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Quick Chennai Test</title>
+    <style>
+        body { font-family: monospace; padding: 20px; background: #f0f0f0; }
+        .result { padding: 10px; margin: 10px 0; border-radius: 5px; }
+        .pass { background: #90EE90; }
+        .fail { background: #FFB6C1; }
+    </style>
+</head>
+<body>
+    <h1>Quick Chennai Classification Test</h1>
+    <button onclick="testChennai()">Test Chennai</button>
+    <div id="output"></div>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/terrain-analyzer.js"></script>
+
+    <script>
+        async function testChennai() {
+            const output = document.getElementById('output');
+            output.innerHTML = '<p>Testing Chennai... Please wait.</p>';
+
+            try {
+                const result = await TerrainAnalyzer.classifyLocation(13.0827, 80.2707);
+
+                const isCorrect = result.region === 'Neithal';
+                const className = isCorrect ? 'pass' : 'fail';
+
+                output.innerHTML = `
+                    <div class="result ${className}">
+                        <h2>${isCorrect ? '✅ PASS' : '❌ FAIL'}</h2>
+                        <p><strong>Location:</strong> Chennai, India (13.0827°N, 80.2707°E)</p>
+                        <p><strong>Expected Region:</strong> Neithal (Coastal)</p>
+                        <p><strong>Actual Region:</strong> ${result.region}</p>
+                        <hr>
+                        <p><strong>Terrain Data:</strong></p>
+                        <ul>
+                            <li>Elevation: ${result.terrainData.elevation.toFixed(1)}m</li>
+                            <li>Distance to Coast: ${result.terrainData.coastDistance.toFixed(1)}km</li>
+                            <li>Annual Precipitation: ${result.terrainData.precipitation.toFixed(0)}mm</li>
+                        </ul>
+                    </div>
+                `;
+            } catch (error) {
+                output.innerHTML = `<div class="result fail"><h2>❌ ERROR</h2><p>${error.message}</p></div>`;
+            }
+        }
+    </script>
+</body>
+</html>

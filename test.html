@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ainthinai Classification Tests</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1a1a1a;
+            color: #00ff00;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            background: #2a2a2a;
+            border-left: 4px solid #00ff00;
+        }
+        .pass { color: #00ff00; }
+        .fail { color: #ff0000; }
+        .info { color: #ffaa00; }
+        h1 { color: #00aaff; }
+        h2 { color: #ffaa00; }
+        button {
+            background: #00ff00;
+            color: #000;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin: 20px 0;
+        }
+        button:hover {
+            background: #00dd00;
+        }
+        #results {
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>🧪 Ainthinai Classification Test Suite</h1>
+    <p>Testing reference cities from India and USA for each of the 5 Ainthinai regions</p>
+
+    <button onclick="runTests()">▶️ Run All Tests</button>
+
+    <div id="results"></div>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/terrain-analyzer.js"></script>
+    <script src="test-locations.js"></script>
+
+    <script>
+        async function runTests() {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.innerHTML = '<p class="info">⏳ Running tests... This may take a few minutes due to API rate limits.</p>';
+
+            const originalLog = console.log;
+            let output = '';
+
+            console.log = function(...args) {
+                const message = args.join(' ');
+                output += message + '\n';
+                originalLog.apply(console, args);
+            };
+
+            try {
+                const results = await runAinthinaiTests();
+                console.log = originalLog;
+
+                // Color code the output
+                const coloredOutput = output
+                    .replace(/✅/g, '<span class="pass">✅</span>')
+                    .replace(/❌/g, '<span class="fail">❌</span>')
+                    .replace(/Expected: (\w+) \| Got: (\w+) ⚠️/g,
+                        '<span class="fail">Expected: $1 | Got: $2 ⚠️</span>')
+                    .replace(/Expected: (\w+) \| Got: (\w+)(?!⚠️)/g,
+                        '<span class="pass">Expected: $1 | Got: $2</span>');
+
+                resultsDiv.innerHTML = `<pre>${coloredOutput}</pre>`;
+            } catch (error) {
+                console.log = originalLog;
+                resultsDiv.innerHTML = `<p class="fail">❌ Error running tests: ${error.message}</p>`;
+            }
+        }
+    </script>
+</body>
+</html>
