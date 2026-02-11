@@ -109,20 +109,38 @@ const APIClient = {
     getCoastalReferencePoints() {
         const points = [];
 
-        // DETAILED INDIAN SUBCONTINENT COASTLINE (every 1 degree)
-        // West coast of India (Arabian Sea)
-        for (let lat = 8; lat <= 23; lat += 1) {
+        // MAJOR INDIAN COASTAL CITIES (explicit points for accuracy)
+        const indianCoastalCities = [
+            { lat: 13.08, lon: 80.27 },   // Chennai
+            { lat: 11.93, lon: 79.83 },   // Puducherry
+            { lat: 8.09, lon: 77.54 },    // Kanyakumari
+            { lat: 9.93, lon: 76.27 },    // Kochi
+            { lat: 11.25, lon: 75.78 },   // Kozhikode
+            { lat: 12.87, lon: 74.84 },   // Mangalore
+            { lat: 15.30, lon: 73.99 },   // Goa (Panaji)
+            { lat: 19.08, lon: 72.88 },   // Mumbai
+            { lat: 18.97, lon: 72.82 },   // Navi Mumbai
+            { lat: 21.17, lon: 72.83 },   // Surat
+            { lat: 17.69, lon: 83.22 },   // Visakhapatnam
+            { lat: 20.27, lon: 85.83 },   // Bhubaneswar (near coast)
+            { lat: 22.57, lon: 88.36 },   // Kolkata
+        ];
+        points.push(...indianCoastalCities);
+
+        // DETAILED INDIAN SUBCONTINENT COASTLINE (every 0.5 degree)
+        // West coast of India (Arabian Sea) - Dense grid
+        for (let lat = 8; lat <= 23; lat += 0.5) {
             points.push({ lat, lon: 68 + (lat - 8) * 0.3 }); // Gujarat to Kerala
         }
 
-        // South coast of India (Indian Ocean)
-        for (let lon = 77; lon <= 80; lon += 0.5) {
-            points.push({ lat: 8, lon }); // Kerala to Tamil Nadu
+        // South coast of India (Indian Ocean) - Very dense
+        for (let lon = 76; lon <= 81; lon += 0.3) {
+            points.push({ lat: 8 + Math.sin(lon - 76) * 0.5, lon }); // Kerala to Tamil Nadu
         }
 
-        // East coast of India (Bay of Bengal) - CHENNAI IS HERE
-        for (let lat = 8; lat <= 22; lat += 0.5) {
-            points.push({ lat, lon: 80 + (lat - 8) * 0.15 }); // Tamil Nadu to Odisha
+        // East coast of India (Bay of Bengal) - CHENNAI IS HERE - Very dense!
+        for (let lat = 8; lat <= 22; lat += 0.3) {
+            points.push({ lat, lon: 80.1 + (lat - 8) * 0.1 }); // Tamil Nadu to Odisha
         }
 
         // Sri Lanka coastline
