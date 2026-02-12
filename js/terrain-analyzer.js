@@ -45,7 +45,11 @@ const TerrainAnalyzer = {
      * Priority order: Neithal → Kurinji → Paalai → Mullai → Marudham
      */
     async classifyLocation(lat, lon) {
+        console.log('=== CLASSIFICATION START ===');
+        console.log('Coordinates:', { lat, lon });
+
         try {
+            console.log('Fetching terrain data...');
             // Fetch all terrain data in parallel for efficiency
             const [elevation, coastDistance, precipitation] = await Promise.all([
                 APIClient.getElevation(lat, lon),
@@ -53,8 +57,22 @@ const TerrainAnalyzer = {
                 APIClient.getAnnualPrecipitation(lat, lon)
             ]);
 
+            console.log('Terrain data received:', {
+                elevation,
+                coastDistance,
+                precipitation,
+                types: {
+                    elevation: typeof elevation,
+                    coastDistance: typeof coastDistance,
+                    precipitation: typeof precipitation
+                }
+            });
+
             // Apply classification rules in priority order
             const region = this.applyClassificationRules(elevation, coastDistance, precipitation);
+
+            console.log('Final classification:', region);
+            console.log('=== CLASSIFICATION END ===');
 
             // Load detailed region information
             const regionData = await this.loadRegionData();
@@ -70,7 +88,7 @@ const TerrainAnalyzer = {
                 coordinates: { lat, lon }
             };
         } catch (error) {
-            console.error('Error classifying location:', error);
+            console.error('CLASSIFICATION ERROR:', error);
             throw new Error('Failed to analyze terrain. Please try again.');
         }
     },
@@ -81,50 +99,73 @@ const TerrainAnalyzer = {
     applyClassificationRules(elevation, coastDistance, precipitation) {
         const T = this.THRESHOLDS;
 
+        console.log('Applying rules with thresholds:', T);
+        console.log('Input values:', { elevation, coastDistance, precipitation });
+
         // 1. NEITHAL (Coastal) - Highest Priority
         // Close to coast and low elevation
-        if (coastDistance <= T.COASTAL_DISTANCE && elevation < T.LOW_ELEVATION) {
-            return 'Neithal';
-        }
+        const neithalCheck = coastDistance <= T.COASTAL_DISTANCE && elevation < T.LOW_ELEVATION;
+        console.log('Neithal check:', {
+            coastDistance,
+            threshold: T.COASTAL_DISTANCE,
+            elevation,
+            elevationThreshold: T.LOW_ELEVATION,
+            passes: neithalCheck,
+            reason: !neithalCheck ?
+                (coastDistance > T.COASTAL_DISTANCE ? `coast distance ${coastDistance.toFixed(1)}km > ${T.COASTAL_DISTANCE}km threshold` : `elevation ${elevation}m >= ${T.LOW_ELEVATION}m threshold`) :
+                'PASSES - NEITHAL'
+        });
+        if (neithalCheck) return 'Neithal';
 
         // 2. KURINJI (Mountains) - Second Priority
         // High elevation and not coastal
-        if (elevation >= T.HIGH_ELEVATION && coastDistance > T.COASTAL_DISTANCE) {
-            return 'Kurinji';
-        }
+        const kurinjiCheck = elevation >= T.HIGH_ELEVATION && coastDistance > T.COASTAL_DISTANCE;
+        console.log('Kurinji check:', {
+            passes: kurinjiCheck,
+            reason: !kurinjiCheck ?
+                (elevation < T.HIGH_ELEVATION ? `elevation ${elevation}m < ${T.HIGH_ELEVATION}m` : 'too coastal') :
+                'PASSES - KURINJI'
+        });
+        if (kurinjiCheck) return 'Kurinji';
 
         // 3. PAALAI (Arid/Desert) - Third Priority
         // Low precipitation, not mountainous, not coastal
-        if (
-            precipitation < T.LOW_PRECIPITATION &&
+        const paalaiCheck = precipitation < T.LOW_PRECIPITATION &&
             elevation < T.HIGH_ELEVATION &&
-            coastDistance > T.COASTAL_DISTANCE
-        ) {
-            return 'Paalai';
-        }
+            coastDistance > T.COASTAL_DISTANCE;
+        console.log('Paalai check:', {
+            passes: paalaiCheck,
+            reason: !paalaiCheck ?
+                (precipitation >= T.LOW_PRECIPITATION ? `precipitation ${precipitation}mm >= ${T.LOW_PRECIPITATION}mm` : 'elevation/coast issue') :
+                'PASSES - PAALAI'
+        });
+        if (paalaiCheck) return 'Paalai';
 
         // 4. MULLAI (Forest/Pastoral) - Fourth Priority
         // Mid-altitude, adequate rainfall, inland
-        if (
-            elevation >= T.MID_ELEVATION_MIN &&
+        const mullaiCheck = elevation >= T.MID_ELEVATION_MIN &&
             elevation < T.HIGH_ELEVATION &&
             precipitation >= T.LOW_PRECIPITATION &&
-            coastDistance > T.COASTAL_DISTANCE
-        ) {
-            return 'Mullai';
-        }
+            coastDistance > T.COASTAL_DISTANCE;
+        console.log('Mullai check:', {
+            passes: mullaiCheck,
+            reason: !mullaiCheck ? 'elevation/precipitation/coast conditions not met' : 'PASSES - MULLAI'
+        });
+        if (mullaiCheck) return 'Mullai';
 
         // 5. MARUDHAM (Plains) - Default
         // Low elevation, adequate rainfall, not coastal
-        if (
-            elevation < T.LOW_ELEVATION &&
+        const marudhamCheck = elevation < T.LOW_ELEVATION &&
             precipitation >= T.LOW_PRECIPITATION &&
-            coastDistance > T.COASTAL_DISTANCE
-        ) {
-            return 'Marudham';
-        }
+            coastDistance > T.COASTAL_DISTANCE;
+        console.log('Marudham check:', {
+            passes: marudhamCheck,
+            reason: !marudhamCheck ? 'conditions not met' : 'PASSES - MARUDHAM'
+        });
+        if (marudhamCheck) return 'Marudham';
 
         // Fallback: If none of the above match perfectly, use best fit
+        console.log('No exact match, using best fit algorithm');
         return this.getBestFitRegion(elevation, coastDistance, precipitation);
     },
 

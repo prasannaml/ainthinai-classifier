@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chennai Classification Debug - Ainthinai</title>
+    <style>
+        body {
+            font-family: 'Courier New', monospace;
+            background: #1e1e1e;
+            color: #d4d4d4;
+            padding: 20px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        h1 {
+            color: #4ec9b0;
+            text-align: center;
+        }
+        .container {
+            background: #252526;
+            border: 2px solid #3c3c3c;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .location {
+            background: #1e1e1e;
+            border-left: 4px solid #007acc;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .location.error {
+            border-left-color: #f48771;
+        }
+        .location.success {
+            border-left-color: #89d185;
+        }
+        .location h2 {
+            margin: 0 0 10px 0;
+            color: #dcdcaa;
+        }
+        .data-row {
+            margin: 5px 0;
+            padding: 5px;
+        }
+        .label {
+            color: #9cdcfe;
+            display: inline-block;
+            width: 200px;
+        }
+        .value {
+            color: #ce9178;
+            font-weight: bold;
+        }
+        .value.pass {
+            color: #89d185;
+        }
+        .value.fail {
+            color: #f48771;
+        }
+        button {
+            background: #007acc;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 14px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-family: 'Courier New', monospace;
+        }
+        button:hover {
+            background: #005a9e;
+        }
+        .controls {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .loading {
+            text-align: center;
+            color: #4ec9b0;
+            font-size: 18px;
+            padding: 20px;
+        }
+        pre {
+            background: #1e1e1e;
+            padding: 10px;
+            border-radius: 4px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+        .status-badge.pass {
+            background: #89d185;
+            color: #1e1e1e;
+        }
+        .status-badge.fail {
+            background: #f48771;
+            color: #1e1e1e;
+        }
+    </style>
+</head>
+<body>
+    <h1>🐛 Chennai Classification Debug</h1>
+    <p style="text-align: center; color: #858585;">
+        Testing coastal classification for Chennai and other critical locations<br>
+        Open browser console (F12) to see detailed debug logs
+    </p>
+
+    <div class="controls">
+        <button onclick="runDebugTests()">🔍 Run Debug Tests</button>
+        <button onclick="clearCache()">🗑️ Clear Cache</button>
+        <button onclick="location.reload()">🔄 Reload</button>
+    </div>
+
+    <div id="loading" class="loading" style="display: none;">
+        ⏳ Running tests... Check console for detailed logs...
+    </div>
+
+    <div id="results"></div>
+
+    <script src="js/api-client.js"></script>
+    <script src="js/terrain-analyzer.js"></script>
+
+    <script>
+        const testLocations = [
+            {
+                name: 'Chennai, India',
+                lat: 13.08,
+                lon: 80.27,
+                expected: {
+                    region: 'Neithal',
+                    maxCoastDistance: 10,
+                    maxElevation: 100
+                }
+            },
+            {
+                name: 'Mumbai, India',
+                lat: 19.08,
+                lon: 72.88,
+                expected: {
+                    region: 'Neithal',
+                    maxCoastDistance: 10,
+                    maxElevation: 100
+                }
+            },
+            {
+                name: 'New York City, USA',
+                lat: 40.71,
+                lon: -74.01,
+                expected: {
+                    region: 'Neithal',
+                    maxCoastDistance: 10,
+                    maxElevation: 100
+                }
+            },
+            {
+                name: 'Delhi, India (Inland)',
+                lat: 28.70,
+                lon: 77.10,
+                expected: {
+                    region: 'Marudham',
+                    minCoastDistance: 500
+                }
+            },
+            {
+                name: 'Denver, USA (Mountains)',
+                lat: 39.74,
+                lon: -104.99,
+                expected: {
+                    region: 'Kurinji',
+                    minElevation: 1000,
+                    minCoastDistance: 1000
+                }
+            }
+        ];
+
+        async function runDebugTests() {
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+
+            resultsDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+
+            console.log('\n'.repeat(3));
+            console.log('='.repeat(80));
+            console.log('🐛 CHENNAI DEBUG TEST SESSION');
+            console.log('='.repeat(80));
+            console.log('');
+
+            // First, test the coastal points generation
+            console.log('📍 Testing coastal reference points...');
+            const coastalPoints = APIClient.getCoastalReferencePoints();
+            console.log(`Total points generated: ${coastalPoints.length}`);
+
+            // Find points near Chennai
+            const chennaiNearby = coastalPoints.filter(p =>
+                Math.abs(p.lat - 13.08) < 0.5 && Math.abs(p.lon - 80.27) < 0.5
+            );
+            console.log(`Points within 0.5° of Chennai: ${chennaiNearby.length}`);
+            console.log('Sample Chennai-area points:', chennaiNearby.slice(0, 10));
+            console.log('');
+
+            // Test each location
+            for (const loc of testLocations) {
+                console.log('\n' + '='.repeat(80));
+                console.log(`📍 Testing: ${loc.name}`);
+                console.log('='.repeat(80));
+
+                try {
+                    const result = await TerrainAnalyzer.classifyLocation(loc.lat, loc.lon);
+                    const { elevation, coastDistance, precipitation } = result.terrainData;
+                    const region = result.region;
+
+                    // Check pass/fail
+                    let passes = true;
+                    const issues = [];
+
+                    if (region !== loc.expected.region) {
+                        passes = false;
+                        issues.push(`Region ${region} !== ${loc.expected.region}`);
+                    }
+
+                    if (loc.expected.maxCoastDistance && coastDistance > loc.expected.maxCoastDistance) {
+                        passes = false;
+                        issues.push(`Coast distance ${coastDistance.toFixed(1)}km > ${loc.expected.maxCoastDistance}km`);
+                    }
+
+                    if (loc.expected.minCoastDistance && coastDistance < loc.expected.minCoastDistance) {
+                        passes = false;
+                        issues.push(`Coast distance ${coastDistance.toFixed(1)}km < ${loc.expected.minCoastDistance}km`);
+                    }
+
+                    if (loc.expected.maxElevation && elevation > loc.expected.maxElevation) {
+                        passes = false;
+                        issues.push(`Elevation ${elevation}m > ${loc.expected.maxElevation}m`);
+                    }
+
+                    if (loc.expected.minElevation && elevation < loc.expected.minElevation) {
+                        passes = false;
+                        issues.push(`Elevation ${elevation}m < ${loc.expected.minElevation}m`);
+                    }
+
+                    // Create result card
+                    const card = document.createElement('div');
+                    card.className = `location ${passes ? 'success' : 'error'}`;
+                    card.innerHTML = `
+                        <h2>
+                            ${loc.name}
+                            <span class="status-badge ${passes ? 'pass' : 'fail'}">
+                                ${passes ? '✅ PASS' : '❌ FAIL'}
+                            </span>
+                        </h2>
+                        <div class="data-row">
+                            <span class="label">Coordinates:</span>
+                            <span class="value">${loc.lat.toFixed(4)}°, ${loc.lon.toFixed(4)}°</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">Classification:</span>
+                            <span class="value ${region === loc.expected.region ? 'pass' : 'fail'}">
+                                ${region} ${result.regionData ? `(${result.regionData.tamil})` : ''}
+                            </span>
+                            <span style="color: #858585;"> [expected: ${loc.expected.region}]</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">Coast Distance:</span>
+                            <span class="value ${
+                                (loc.expected.maxCoastDistance && coastDistance <= loc.expected.maxCoastDistance) ||
+                                (loc.expected.minCoastDistance && coastDistance >= loc.expected.minCoastDistance) ||
+                                (!loc.expected.maxCoastDistance && !loc.expected.minCoastDistance)
+                                ? 'pass' : 'fail'
+                            }">
+                                ${coastDistance.toFixed(2)} km
+                            </span>
+                            ${loc.expected.maxCoastDistance ? `<span style="color: #858585;"> [expected < ${loc.expected.maxCoastDistance}km]</span>` : ''}
+                            ${loc.expected.minCoastDistance ? `<span style="color: #858585;"> [expected > ${loc.expected.minCoastDistance}km]</span>` : ''}
+                        </div>
+                        <div class="data-row">
+                            <span class="label">Elevation:</span>
+                            <span class="value">${elevation.toFixed(0)} m</span>
+                        </div>
+                        <div class="data-row">
+                            <span class="label">Annual Precipitation:</span>
+                            <span class="value">${precipitation.toFixed(0)} mm/year</span>
+                        </div>
+                        ${!passes ? `
+                            <div class="data-row" style="margin-top: 15px; color: #f48771;">
+                                <strong>❌ Issues:</strong><br>
+                                ${issues.map(i => `&nbsp;&nbsp;&nbsp;&nbsp;• ${i}`).join('<br>')}
+                            </div>
+                        ` : ''}
+                    `;
+                    resultsDiv.appendChild(card);
+
+                } catch (error) {
+                    console.error(`ERROR testing ${loc.name}:`, error);
+
+                    const card = document.createElement('div');
+                    card.className = 'location error';
+                    card.innerHTML = `
+                        <h2>${loc.name} <span class="status-badge fail">❌ ERROR</span></h2>
+                        <div class="data-row">
+                            <span class="label">Error:</span>
+                            <span class="value fail">${error.message}</span>
+                        </div>
+                        <pre>${error.stack}</pre>
+                    `;
+                    resultsDiv.appendChild(card);
+                }
+            }
+
+            loadingDiv.style.display = 'none';
+
+            console.log('\n' + '='.repeat(80));
+            console.log('✅ Debug tests complete');
+            console.log('='.repeat(80));
+        }
+
+        function clearCache() {
+            localStorage.clear();
+            console.log('✅ Cache cleared');
+            alert('Cache cleared! Run tests again to fetch fresh data.');
+        }
+
+        // Auto-run on page load
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                runDebugTests();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

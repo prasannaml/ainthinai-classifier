@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Coastal Distance Unit Tests - Ainthinai Classifier</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .test-controls {
+            text-align: center;
+            margin: 30px 0;
+        }
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 5px;
+            transition: transform 0.2s;
+        }
+        button:hover {
+            transform: scale(1.05);
+        }
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        .results {
+            margin-top: 30px;
+        }
+        .test-case {
+            background: #f8f9fa;
+            border-left: 5px solid #ccc;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .test-case.pass {
+            border-left-color: #28a745;
+            background: #d4edda;
+        }
+        .test-case.fail {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+        }
+        .test-header {
+            font-weight: bold;
+            font-size: 18px;
+            margin-bottom: 10px;
+        }
+        .test-details {
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 3px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        .status.pass {
+            background: #28a745;
+            color: white;
+        }
+        .status.fail {
+            background: #dc3545;
+            color: white;
+        }
+        .summary {
+            background: #e9ecef;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .summary h2 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+        .summary-stats {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .loading {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #667eea;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Coastal Distance Unit Tests</h1>
+        <p style="text-align: center; color: #666;">
+            Testing the accuracy of coastal distance calculations for known locations
+        </p>
+
+        <div class="test-controls">
+            <button id="runTests" onclick="runAllTests()">🚀 Run All Tests</button>
+            <button id="clearCache" onclick="clearAllCaches()">🗑️ Clear Cache</button>
+            <button onclick="location.reload()">🔄 Reload Page</button>
+        </div>
+
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            Running tests... Please wait.
+        </div>
+
+        <div id="summary" style="display: none;" class="summary">
+            <h2>Test Summary</h2>
+            <div class="summary-stats">
+                <span style="color: #28a745;">✅ <span id="passCount">0</span> Passed</span>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span style="color: #dc3545;">❌ <span id="failCount">0</span> Failed</span>
+                &nbsp;&nbsp;|&nbsp;&nbsp;
+                <span style="color: #6c757d;">📊 <span id="totalCount">0</span> Total</span>
+            </div>
+        </div>
+
+        <div id="results" class="results"></div>
+    </div>
+
+    <!-- Load the terrain analyzer and API client -->
+    <script src="js/api-client.js"></script>
+    <script src="js/terrain-analyzer.js"></script>
+
+    <script>
+        const testCases = [
+            // Coastal cities (should be very close to coast, < 10 km)
+            {
+                name: 'Chennai, India (Bay of Bengal)',
+                lat: 13.08,
+                lon: 80.27,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Major coastal city on east coast of India'
+            },
+            {
+                name: 'Mumbai, India (Arabian Sea)',
+                lat: 19.08,
+                lon: 72.88,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Major coastal city on west coast of India'
+            },
+            {
+                name: 'New York City, USA (Atlantic)',
+                lat: 40.71,
+                lon: -74.01,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Major coastal city on US east coast'
+            },
+            {
+                name: 'Miami, USA (Atlantic)',
+                lat: 25.76,
+                lon: -80.19,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Coastal city in Florida'
+            },
+            {
+                name: 'Los Angeles, USA (Pacific)',
+                lat: 34.05,
+                lon: -118.24,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Major coastal city on US west coast'
+            },
+            {
+                name: 'Kochi, India (Arabian Sea)',
+                lat: 9.93,
+                lon: 76.27,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Port city in Kerala'
+            },
+            {
+                name: 'Puducherry, India (Bay of Bengal)',
+                lat: 11.93,
+                lon: 79.83,
+                maxExpectedDistance: 10,
+                expectedRegion: 'Neithal',
+                description: 'Coastal town in Tamil Nadu'
+            },
+
+            // Near-coastal (10-50 km from coast, should still be Neithal)
+            {
+                name: 'Test Point 30km inland from Chennai',
+                lat: 13.08,
+                lon: 80.55,
+                maxExpectedDistance: 40,
+                expectedRegion: 'Neithal',
+                description: 'Should still be within Neithal threshold'
+            },
+
+            // Inland cities (> 50 km from coast)
+            {
+                name: 'Delhi, India (Inland)',
+                lat: 28.70,
+                lon: 77.10,
+                minExpectedDistance: 500,
+                expectedRegion: 'Marudham',
+                description: 'Major inland city, should NOT be coastal'
+            },
+            {
+                name: 'Denver, USA (Mountains)',
+                lat: 39.74,
+                lon: -104.99,
+                minExpectedDistance: 1000,
+                expectedRegion: 'Kurinji',
+                description: 'High elevation, far from coast'
+            },
+            {
+                name: 'Phoenix, USA (Desert)',
+                lat: 33.45,
+                lon: -112.07,
+                minExpectedDistance: 300,
+                expectedRegion: 'Paalai',
+                description: 'Desert city, far from coast'
+            },
+            {
+                name: 'Bangalore, India (Inland plateau)',
+                lat: 12.97,
+                lon: 77.59,
+                minExpectedDistance: 200,
+                expectedRegion: 'Mullai',
+                description: 'Mid-elevation plateau, inland'
+            }
+        ];
+
+        async function runAllTests() {
+            const resultsDiv = document.getElementById('results');
+            const loadingDiv = document.getElementById('loading');
+            const summaryDiv = document.getElementById('summary');
+            const runButton = document.getElementById('runTests');
+
+            resultsDiv.innerHTML = '';
+            loadingDiv.style.display = 'block';
+            summaryDiv.style.display = 'none';
+            runButton.disabled = true;
+
+            console.log('=== STARTING UNIT TESTS ===\n');
+
+            let passCount = 0;
+            let failCount = 0;
+
+            // First, test the Haversine formula
+            console.log('Testing Haversine formula accuracy...');
+            const testDistance = APIClient.haversineDistance(13.08, 80.27, 13.08, 81.27);
+            console.log(`1 degree longitude at lat 13°: ${testDistance.toFixed(2)} km`);
+            console.log(`Expected: ~109 km (cos(13°) × 111 km)\n`);
+
+            // Test coastal reference points
+            const coastalPoints = APIClient.getCoastalReferencePoints();
+            console.log(`Total coastal reference points: ${coastalPoints.length}\n`);
+
+            // Run each test case
+            for (const test of testCases) {
+                console.log(`\n=== Testing: ${test.name} ===`);
+
+                try {
+                    // Get classification
+                    const result = await TerrainAnalyzer.classifyLocation(test.lat, test.lon);
+
+                    const { elevation, coastDistance, precipitation } = result.terrainData;
+                    const region = result.region;
+
+                    // Check if test passes
+                    let distancePass = true;
+                    let regionPass = region === test.expectedRegion;
+                    let failReasons = [];
+
+                    if (test.maxExpectedDistance !== undefined) {
+                        distancePass = coastDistance <= test.maxExpectedDistance;
+                        if (!distancePass) {
+                            failReasons.push(`Distance ${coastDistance.toFixed(1)}km > expected max ${test.maxExpectedDistance}km`);
+                        }
+                    }
+
+                    if (test.minExpectedDistance !== undefined) {
+                        distancePass = coastDistance >= test.minExpectedDistance;
+                        if (!distancePass) {
+                            failReasons.push(`Distance ${coastDistance.toFixed(1)}km < expected min ${test.minExpectedDistance}km`);
+                        }
+                    }
+
+                    if (!regionPass) {
+                        failReasons.push(`Region ${region} !== expected ${test.expectedRegion}`);
+                    }
+
+                    const passes = distancePass && regionPass;
+
+                    if (passes) passCount++;
+                    else failCount++;
+
+                    // Create result card
+                    const card = document.createElement('div');
+                    card.className = `test-case ${passes ? 'pass' : 'fail'}`;
+                    card.innerHTML = `
+                        <div class="test-header">
+                            <span class="status ${passes ? 'pass' : 'fail'}">${passes ? '✅ PASS' : '❌ FAIL'}</span>
+                            ${test.name}
+                        </div>
+                        <div class="test-details">${test.description}</div>
+                        <div class="test-details">📍 Location: ${test.lat.toFixed(2)}°, ${test.lon.toFixed(2)}°</div>
+                        <div class="test-details">🌊 Coast Distance: <strong>${coastDistance.toFixed(2)} km</strong> ${test.maxExpectedDistance ? `(expected < ${test.maxExpectedDistance}km)` : test.minExpectedDistance ? `(expected > ${test.minExpectedDistance}km)` : ''}</div>
+                        <div class="test-details">⛰️ Elevation: ${elevation.toFixed(0)} m</div>
+                        <div class="test-details">🌧️ Precipitation: ${precipitation.toFixed(0)} mm/year</div>
+                        <div class="test-details">🏞️ Classification: <strong>${region}</strong> (expected: ${test.expectedRegion})</div>
+                        ${!passes ? `<div class="test-details" style="color: #dc3545; margin-top: 10px;"><strong>Failures:</strong><br>${failReasons.join('<br>')}</div>` : ''}
+                    `;
+                    resultsDiv.appendChild(card);
+
+                } catch (error) {
+                    failCount++;
+                    console.error(`Test failed with error:`, error);
+
+                    const card = document.createElement('div');
+                    card.className = 'test-case fail';
+                    card.innerHTML = `
+                        <div class="test-header">
+                            <span class="status fail">❌ ERROR</span>
+                            ${test.name}
+                        </div>
+                        <div class="test-details">${test.description}</div>
+                        <div class="test-details" style="color: #dc3545;"><strong>Error:</strong> ${error.message}</div>
+                    `;
+                    resultsDiv.appendChild(card);
+                }
+            }
+
+            // Show summary
+            document.getElementById('passCount').textContent = passCount;
+            document.getElementById('failCount').textContent = failCount;
+            document.getElementById('totalCount').textContent = testCases.length;
+
+            loadingDiv.style.display = 'none';
+            summaryDiv.style.display = 'block';
+            runButton.disabled = false;
+
+            console.log('\n=== TEST SUMMARY ===');
+            console.log(`Passed: ${passCount}/${testCases.length}`);
+            console.log(`Failed: ${failCount}/${testCases.length}`);
+            console.log(`Success Rate: ${(passCount/testCases.length*100).toFixed(1)}%`);
+        }
+
+        function clearAllCaches() {
+            if (confirm('Clear all cached data? This will force fresh API calls for all tests.')) {
+                localStorage.clear();
+                alert('Cache cleared! Click "Run All Tests" to fetch fresh data.');
+                console.log('✅ All caches cleared');
+            }
+        }
+
+        // Auto-run tests on page load
+        window.addEventListener('load', () => {
+            console.log('Page loaded. Ready to run tests.');
+            console.log('Click "Run All Tests" to begin, or tests will auto-run in 2 seconds...');
+
+            setTimeout(() => {
+                if (confirm('Auto-run all tests now?')) {
+                    runAllTests();
+                }
+            }, 2000);
+        });
+    </script>
+</body>
+</html>
