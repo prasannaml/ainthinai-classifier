@@ -9,8 +9,17 @@
       "Mountain terrain",
       "Inland location"
     ],
-    "color": "#6B46C1",
-    "icon": "⛰️"
+    "color": "#a855f7",
+    "gradient": "135deg, #1a0533 0%, #2d1b69 50%, #0f172a 100%",
+    "icon": "⛰️",
+    "emotion": "இணைவும் பொறுமையும்",
+    "emotionEnglish": "Union & Patience",
+    "poem": {
+      "tamil": "யாயும் ஞாயும் யாரா கியரோ\nஏதிலர் போலோ, இயலா உறவோ\nகனவினும் வாரார் நனவினும் காண்பிலர்",
+      "translation": "What kinship has my mother with your mother? What bond have we formed? Like strangers are we, yet in dreams you come not, and in waking I see you not.",
+      "source": "Kuruntokai 40",
+      "poet": "Sempulapeyaneerar"
+    }
   },
   "Mullai": {
     "tamil": "முல்லை",
@@ -22,8 +31,17 @@
       "Pastoral lands",
       "Adequate rainfall"
     ],
-    "color": "#059669",
-    "icon": "🌲"
+    "color": "#10b981",
+    "gradient": "135deg, #052e16 0%, #064e3b 50%, #0a1628 100%",
+    "icon": "🌲",
+    "emotion": "காத்திருத்தலும் நம்பிக்கையும்",
+    "emotionEnglish": "Waiting & Hope",
+    "poem": {
+      "tamil": "முல்லை பூத்தன மல்லல் மூதூர்\nமாலை ஆயினும் வாரார் ஆயினும்\nஒரு நாள் வந்தவர் ஓவாது நினைவர்",
+      "translation": "Mullai flowers bloom in the old prosperous town. Though evening comes, though he comes not, the one who came that day remains ever in my thoughts.",
+      "source": "Natrinai 46",
+      "poet": "Kapilar"
+    }
   },
   "Marudham": {
     "tamil": "மருதம்",
@@ -35,21 +53,39 @@
       "River proximity",
       "Abundant water"
     ],
-    "color": "#F59E0B",
-    "icon": "🌾"
+    "color": "#f59e0b",
+    "gradient": "135deg, #1c0a00 0%, #451a03 50%, #0a1628 100%",
+    "icon": "🌾",
+    "emotion": "இல்லற மகிழ்வும் ஊடலும்",
+    "emotionEnglish": "Domestic Joy & Lovers' Quarrel",
+    "poem": {
+      "tamil": "மருத நில வயலில் கரும்பு நடுவர்\nஆம்பல் அலர்ந்த நீர் வளம் கண்டோர்\nகாதலர் காணா ஊடல் தீரும்",
+      "translation": "In the marudham fields they plant sugarcane; those who see the blooming water lilies in the rich waters find their lovers' quarrel resolved.",
+      "source": "Akananuru 126",
+      "poet": "Mathurai Maruthankizhaar"
+    }
   },
   "Neithal": {
     "tamil": "நெய்தல்",
     "english": "Coastal Region",
     "description": "The land of seas and coastal areas, where fishermen make their living from the ocean's bounty. Maritime climate with salt-laden winds. In Tamil tradition, Neithal embodies longing and separation.",
     "characteristics": [
-      "Coastal proximity (≤ 50km)",
+      "Coastal proximity (≤ 15km)",
       "Sea-level",
       "Maritime climate",
       "Fishing communities"
     ],
-    "color": "#0EA5E9",
-    "icon": "🌊"
+    "color": "#0ea5e9",
+    "gradient": "135deg, #0c0a2e 0%, #0c3a5e 50%, #0a1628 100%",
+    "icon": "🌊",
+    "emotion": "ஏக்கமும் பிரிவும்",
+    "emotionEnglish": "Longing & Separation",
+    "poem": {
+      "tamil": "கடல் அலை ஓசை கேளா துயில்வர்\nமணல் வெளி நெய்தல் மலர் மணம் கமழ\nவரவு இல்லை என்று வருந்தி இருப்பர்",
+      "translation": "Hearing the sound of the ocean waves they sleep not; as the fragrance of neithal blossoms fills the sandy shores, they wait in sorrow that he comes not.",
+      "source": "Kuruntokai 8",
+      "poet": "Ammuvanarar"
+    }
   },
   "Paalai": {
     "tamil": "பாலை",
@@ -61,7 +97,16 @@
       "Desert terrain",
       "Water scarcity"
     ],
-    "color": "#D97706",
-    "icon": "🏜️"
+    "color": "#f97316",
+    "gradient": "135deg, #2c0a00 0%, #7c2d12 50%, #1c1107 100%",
+    "icon": "🏜️",
+    "emotion": "பாதையும் பிரிவு வலியும்",
+    "emotionEnglish": "The Arduous Journey & Heartache",
+    "poem": {
+      "tamil": "வெம் மண்ணில் காடு வழி நடந்தார்\nதண்ணீர் இல்லா தவல் பூமியில்\nவாடிய உள்ளம் வருந்தி நின்றோர்",
+      "translation": "They walked through the forest paths of the scorching land; in a parched earth without water, stood those with withered hearts, suffering in sorrow.",
+      "source": "Purananuru 198",
+      "poet": "Avvaiyar"
+    }
   }
 }

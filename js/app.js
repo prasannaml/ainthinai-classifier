@@ -11,6 +11,32 @@ const App = {
         console.log('Ainthinai Classifier initialized');
         this.setupEventListeners();
         this.checkGeolocationSupport();
+        HistoryModule.render();
+        this.handleUrlParams();
+    },
+
+    /**
+     * Handle ?lat= &lon= or ?q= URL params for shareable links
+     */
+    async handleUrlParams() {
+        const params = new URLSearchParams(window.location.search);
+        const lat = params.get('lat');
+        const lon = params.get('lon');
+        const q = params.get('q');
+
+        if (lat && lon) {
+            const parsedLat = parseFloat(lat);
+            const parsedLon = parseFloat(lon);
+            if (!isNaN(parsedLat) && !isNaN(parsedLon)) {
+                setTimeout(() => this.classifyAndDisplay(parsedLat, parsedLon), 400);
+            }
+        } else if (q) {
+            const input = document.getElementById('location-input');
+            if (input) {
+                input.value = decodeURIComponent(q);
+                setTimeout(() => this.handleSearch(), 400);
+            }
+        }
     },
 
     /**
@@ -33,9 +59,7 @@ const App = {
         const locationInput = document.getElementById('location-input');
         if (locationInput) {
             locationInput.addEventListener('keypress', (e) => {
-                if (e.key === 'Enter') {
-                    this.handleSearch();
-                }
+                if (e.key === 'Enter') this.handleSearch();
             });
         }
 
@@ -50,6 +74,11 @@ const App = {
         if (errorRetryBtn) {
             errorRetryBtn.addEventListener('click', () => this.resetToInput());
         }
+
+        // Share buttons
+        document.getElementById('share-twitter-btn')?.addEventListener('click', () => ShareModule.shareOnTwitter());
+        document.getElementById('share-copy-btn')?.addEventListener('click', () => ShareModule.copyLink());
+        document.getElementById('share-image-btn')?.addEventListener('click', () => ShareModule.downloadAsImage());
     },
 
     /**
@@ -72,20 +101,13 @@ const App = {
     async handleDetectLocation() {
         try {
             this.showLoading('Requesting location permission...');
-
-            // Get current position
             const position = await GeoLocation.requestLocation((message) => {
                 this.updateLoadingMessage(message);
             });
-
-            // Classify the location
             await this.classifyAndDisplay(position.lat, position.lon);
         } catch (error) {
             console.error('Geolocation error:', error);
-            this.showError(
-                'Location Access Failed',
-                error.userMessage || error.message
-            );
+            this.showError('Location Access Failed', error.userMessage || error.message);
         }
     },
 
@@ -103,20 +125,13 @@ const App = {
 
         try {
             this.showLoading('Searching for location...');
-
-            // Search for location (handles both addresses and coordinates)
             const result = await Geocoding.search(locationText, (message) => {
                 this.updateLoadingMessage(message);
             });
-
-            // Classify the location
             await this.classifyAndDisplay(result.lat, result.lon, result.displayName);
         } catch (error) {
             console.error('Search error:', error);
-            this.showError(
-                'Location Search Failed',
-                error.userMessage || error.message
-            );
+            this.showError('Location Search Failed', error.userMessage || error.message);
         }
     },
 
@@ -126,24 +141,17 @@ const App = {
     async classifyAndDisplay(lat, lon, displayName = null) {
         try {
             this.updateLoadingMessage('Analyzing terrain characteristics...');
-
-            // Get classification
             const result = await TerrainAnalyzer.classifyLocation(lat, lon);
 
-            // Get location name if not provided
             if (!displayName) {
                 this.updateLoadingMessage('Getting location details...');
                 displayName = await GeoLocation.getLocationName(lat, lon);
             }
 
-            // Display results
             this.showResults(result, displayName);
         } catch (error) {
             console.error('Classification error:', error);
-            this.showError(
-                'Classification Failed',
-                error.message || 'Unable to analyze this location. Please try another one.'
-            );
+            this.showError('Classification Failed', error.message || 'Unable to analyze this location. Please try another one.');
         }
     },
 
@@ -153,53 +161,91 @@ const App = {
     showResults(result, locationName) {
         const { region, regionData, terrainData, coordinates } = result;
 
-        // Hide other sections
         this.hideAllSections();
 
-        // Populate result card
+        // Apply region theme to body
+        document.body.setAttribute('data-region', region);
+
+        // Region header
         const regionIcon = document.getElementById('region-icon');
         const regionNameEl = document.getElementById('region-name');
         const regionTamil = document.getElementById('region-tamil');
         const regionEnglish = document.getElementById('region-english');
         const regionDesc = document.getElementById('region-description');
-        const charList = document.getElementById('characteristics-list');
-        const locationCoords = document.getElementById('location-coords');
+        const emotionBadge = document.getElementById('emotion-badge');
 
         if (regionIcon) regionIcon.textContent = regionData.icon || '';
-        if (regionNameEl) regionNameEl.textContent = region;
+        if (regionNameEl) {
+            regionNameEl.textContent = region;
+            regionNameEl.style.color = regionData.color || '';
+        }
         if (regionTamil) regionTamil.textContent = regionData.tamil || '';
         if (regionEnglish) regionEnglish.textContent = regionData.english || '';
         if (regionDesc) regionDesc.textContent = regionData.description || '';
 
-        // Populate characteristics
+        // Emotion badge
+        if (emotionBadge && regionData.emotionEnglish) {
+            emotionBadge.innerHTML = `
+                <span class="emotion-tamil">${regionData.emotion || ''}</span>
+                <span class="emotion-english">${regionData.emotionEnglish}</span>
+            `;
+        }
+
+        // Characteristics
+        const charList = document.getElementById('characteristics-list');
         if (charList && regionData.characteristics) {
             charList.innerHTML = regionData.characteristics
                 .map(char => `<li>${char}</li>`)
                 .join('');
         }
 
-        // Populate terrain parameters
+        // Terrain parameters (with count-up animation)
         const formatted = TerrainAnalyzer.formatTerrainData(terrainData);
-        const elevationEl = document.getElementById('param-elevation');
-        const coastEl = document.getElementById('param-coast');
-        const precipEl = document.getElementById('param-precipitation');
+        this.animateValue('param-elevation', formatted.elevation);
+        this.animateValue('param-coast', formatted.coastDistance);
+        this.animateValue('param-precipitation', formatted.precipitation);
 
-        if (elevationEl) elevationEl.textContent = formatted.elevation;
-        if (coastEl) coastEl.textContent = formatted.coastDistance;
-        if (precipEl) precipEl.textContent = formatted.precipitation;
+        // Result card border color
+        const resultCard = document.getElementById('result-card');
+        if (resultCard && regionData.color) {
+            resultCard.style.borderTopColor = regionData.color;
+            // Apply CSS variable for region color
+            resultCard.style.setProperty('--region-color', regionData.color);
+        }
 
-        // Display location
+        // Poem section
+        const poem = regionData.poem;
+        if (poem) {
+            const poemTamil = document.getElementById('poem-tamil');
+            const poemTranslation = document.getElementById('poem-translation');
+            const poemSource = document.getElementById('poem-source');
+            if (poemTamil) poemTamil.textContent = poem.tamil || '';
+            if (poemTranslation) poemTranslation.textContent = poem.translation || '';
+            if (poemSource) poemSource.textContent = `— ${poem.source}${poem.poet ? ', ' + poem.poet : ''}`;
+
+            const poemSection = document.getElementById('poem-section');
+            if (poemSection) poemSection.style.borderLeftColor = regionData.color || '';
+        }
+
+        // Location coords
+        const locationCoords = document.getElementById('location-coords');
         if (locationCoords) {
             const coordsText = GeoLocation.formatCoordinates(coordinates.lat, coordinates.lon);
             locationCoords.textContent = `${locationName || 'Your location'} (${coordsText})`;
         }
 
-        // Set region color theme
-        const resultCard = document.getElementById('result-card');
-        if (resultCard && regionData.color) {
-            resultCard.style.borderTopColor = regionData.color;
-            regionNameEl.style.color = regionData.color;
-        }
+        // Share module context
+        ShareModule.setContext(region, locationName, coordinates.lat, coordinates.lon);
+
+        // Save to history
+        HistoryModule.save(
+            locationName || `${coordinates.lat.toFixed(2)}, ${coordinates.lon.toFixed(2)}`,
+            region,
+            regionData.icon || '📍',
+            regionData.color || '#818cf8',
+            coordinates.lat,
+            coordinates.lon
+        );
 
         // Show results section
         const resultsSection = document.getElementById('results-section');
@@ -207,6 +253,29 @@ const App = {
             resultsSection.classList.remove('hidden');
             resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
+
+        // Render map after results are visible
+        setTimeout(() => {
+            if (typeof MapView !== 'undefined') {
+                MapView.render(coordinates.lat, coordinates.lon, region, regionData.color || '#818cf8');
+            }
+        }, 400);
+    },
+
+    /**
+     * Animate a value display with a pop-in effect
+     */
+    animateValue(elementId, displayValue) {
+        const el = document.getElementById(elementId);
+        if (!el) return;
+        el.style.opacity = '0';
+        el.style.transform = 'scale(0.8)';
+        el.textContent = displayValue;
+        requestAnimationFrame(() => {
+            el.style.transition = 'opacity 0.4s ease, transform 0.4s cubic-bezier(0.34,1.56,0.64,1)';
+            el.style.opacity = '1';
+            el.style.transform = 'scale(1)';
+        });
     },
 
     /**
@@ -214,10 +283,8 @@ const App = {
      */
     showLoading(message) {
         this.hideAllSections();
-
         const loadingSection = document.getElementById('loading-section');
         const loadingText = document.getElementById('loading-subtext');
-
         if (loadingText) loadingText.textContent = message || '';
         if (loadingSection) loadingSection.classList.remove('hidden');
     },
@@ -235,6 +302,7 @@ const App = {
      */
     showError(title, message) {
         this.hideAllSections();
+        document.body.removeAttribute('data-region');
 
         const errorSection = document.getElementById('error-section');
         const errorTitle = document.getElementById('error-title');
@@ -245,6 +313,11 @@ const App = {
         if (errorSection) {
             errorSection.classList.remove('hidden');
             errorSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+            // Auto-focus the input after error for better UX
+            setTimeout(() => {
+                document.getElementById('location-input')?.focus();
+            }, 600);
         }
     },
 
@@ -253,30 +326,27 @@ const App = {
      */
     resetToInput() {
         this.hideAllSections();
+        document.body.removeAttribute('data-region');
+        MapView.destroy?.();
 
         const inputSection = document.getElementById('input-section');
         if (inputSection) {
             inputSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
 
-        // Clear input
         const locationInput = document.getElementById('location-input');
-        if (locationInput) locationInput.value = '';
+        if (locationInput) {
+            locationInput.value = '';
+            locationInput.focus();
+        }
     },
 
     /**
-     * Hide all dynamic sections (loading, results, error)
+     * Hide all dynamic sections
      */
     hideAllSections() {
-        const sections = [
-            'loading-section',
-            'results-section',
-            'error-section'
-        ];
-
-        sections.forEach(sectionId => {
-            const section = document.getElementById(sectionId);
-            if (section) section.classList.add('hidden');
+        ['loading-section', 'results-section', 'error-section'].forEach(id => {
+            document.getElementById(id)?.classList.add('hidden');
         });
     }
 };

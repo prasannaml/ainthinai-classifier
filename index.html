@@ -4,50 +4,52 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Where Am I in Ainthinai? - Ancient Tamil Geography</title>
-    <meta name="description" content="Discover which of the five Tamil Sangam Ainthinai regions your location belongs to">
+    <meta name="description" content="Discover which of the five Tamil Sangam Ainthinai regions your location belongs to, with cultural poetry and an interactive map.">
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600&display=swap" rel="stylesheet">
+    <!-- Leaflet.js CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <!-- Hero Section -->
     <header class="hero">
+        <div class="hero-glow"></div>
         <div class="container">
+            <div class="hero-badge">ஐந்திணை</div>
             <h1 class="hero-title">Where Am I in Ainthinai?</h1>
             <p class="hero-subtitle">Discover Your Location Through Ancient Tamil Geography</p>
 
             <div class="intro-text">
                 <p>
-                    <strong>Ainthinai (ஐந்திணை)</strong> is an ancient Tamil classification system that divides the world into five geographical regions,
-                    each with unique landscapes, climates, and cultural significance. Rooted in classical Tamil Sangam literature,
-                    this system connects geography with human emotions and experiences.
+                    <strong>Ainthinai (ஐந்திணை)</strong> is an ancient Tamil classification system from classical Sangam literature that divides the world into five geographical regions,
+                    each with unique landscapes, climates, and the emotions of the human heart.
                 </p>
 
                 <div class="regions-preview">
                     <div class="region-tag" data-region="Kurinji">
                         <span class="region-icon">⛰️</span>
-                        <span><strong>Kurinji</strong> (குறிஞ்சி) - Mountains and hills</span>
+                        <span><strong>Kurinji</strong> (குறிஞ்சி) — Mountains</span>
                     </div>
                     <div class="region-tag" data-region="Mullai">
                         <span class="region-icon">🌲</span>
-                        <span><strong>Mullai</strong> (முல்லை) - Forests and pastoral lands</span>
+                        <span><strong>Mullai</strong> (முல்லை) — Forests</span>
                     </div>
                     <div class="region-tag" data-region="Marudham">
                         <span class="region-icon">🌾</span>
-                        <span><strong>Marudham</strong> (மருதம்) - Fertile plains and agricultural areas</span>
+                        <span><strong>Marudham</strong> (மருதம்) — Plains</span>
                     </div>
                     <div class="region-tag" data-region="Neithal">
                         <span class="region-icon">🌊</span>
-                        <span><strong>Neithal</strong> (நெய்தல்) - Coastal regions and seas</span>
+                        <span><strong>Neithal</strong> (நெய்தல்) — Coastal</span>
                     </div>
                     <div class="region-tag" data-region="Paalai">
                         <span class="region-icon">🏜️</span>
-                        <span><strong>Paalai</strong> (பாலை) - Arid deserts and wastelands</span>
+                        <span><strong>Paalai</strong> (பாலை) — Arid</span>
                     </div>
                 </div>
-
-                <p>
-                    This tool analyzes the terrain characteristics of any location worldwide—elevation, distance to coastline,
-                    and precipitation—and classifies it according to the Ainthinai system.
-                </p>
             </div>
         </div>
     </header>
@@ -56,20 +58,20 @@
     <main class="main-content">
         <div class="container">
             <section id="input-section" class="input-section">
-                <h2 class="section-title">How would you like to find your Ainthinai?</h2>
+                <h2 class="section-title">Find Your Ainthinai</h2>
 
                 <div class="input-options">
                     <!-- Option A: Auto-detect -->
                     <div class="input-option">
                         <div class="option-label">
                             <span class="option-letter">A</span>
-                            <span class="option-title">Allow Location (Most Precise)</span>
+                            <span class="option-title">Allow Location <span class="option-badge">Most Precise</span></span>
                         </div>
                         <button id="detect-location-btn" class="btn btn-primary">
                             <span class="btn-icon">📍</span>
                             <span>Detect My Location</span>
                         </button>
-                        <p class="option-hint">We'll automatically detect your exact location</p>
+                        <p class="option-hint">We'll automatically detect your exact location using your device's GPS</p>
                     </div>
 
                     <div class="option-divider">
@@ -99,9 +101,16 @@
                 </div>
             </section>
 
+            <!-- History Section -->
+            <section id="history-section" class="history-section"></section>
+
             <!-- Loading Section -->
             <section id="loading-section" class="loading-section hidden">
-                <div class="spinner"></div>
+                <div class="loading-orb">
+                    <div class="orb-ring"></div>
+                    <div class="orb-ring orb-ring-2"></div>
+                    <div class="orb-core">🌍</div>
+                </div>
                 <p class="loading-text">Analyzing terrain characteristics...</p>
                 <p class="loading-subtext" id="loading-subtext"></p>
             </section>
@@ -109,24 +118,23 @@
             <!-- Results Section -->
             <section id="results-section" class="results-section hidden">
                 <div class="result-card" id="result-card">
+                    <!-- Result Header -->
                     <div class="result-header">
                         <div class="region-icon-large" id="region-icon"></div>
-                        <div>
+                        <div class="result-header-text">
                             <h2 class="region-name" id="region-name"></h2>
                             <p class="region-tamil" id="region-tamil"></p>
                             <p class="region-english" id="region-english"></p>
+                            <div class="emotion-badge" id="emotion-badge"></div>
                         </div>
                     </div>
 
+                    <!-- Region Description -->
                     <div class="result-description">
                         <p id="region-description"></p>
                     </div>
 
-                    <div class="result-characteristics">
-                        <h3>Characteristics</h3>
-                        <ul id="characteristics-list"></ul>
-                    </div>
-
+                    <!-- Terrain Parameters -->
                     <div class="terrain-parameters">
                         <h3>Terrain Analysis</h3>
                         <div class="parameters-grid">
@@ -134,32 +142,78 @@
                                 <span class="param-icon">📏</span>
                                 <div>
                                     <div class="param-label">Elevation</div>
-                                    <div class="param-value" id="param-elevation"></div>
+                                    <div class="param-value" id="param-elevation" data-raw="0"></div>
                                 </div>
                             </div>
                             <div class="parameter">
                                 <span class="param-icon">🌊</span>
                                 <div>
                                     <div class="param-label">Distance to Coast</div>
-                                    <div class="param-value" id="param-coast"></div>
+                                    <div class="param-value" id="param-coast" data-raw="0"></div>
                                 </div>
                             </div>
                             <div class="parameter">
                                 <span class="param-icon">🌧️</span>
                                 <div>
                                     <div class="param-label">Annual Precipitation</div>
-                                    <div class="param-value" id="param-precipitation"></div>
+                                    <div class="param-value" id="param-precipitation" data-raw="0"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
+                    <!-- Characteristics -->
+                    <div class="result-characteristics">
+                        <h3>Characteristics</h3>
+                        <ul id="characteristics-list"></ul>
+                    </div>
+
+                    <!-- Sangam Poetry Section -->
+                    <div class="poem-section" id="poem-section">
+                        <div class="poem-header">
+                            <span class="poem-icon">📜</span>
+                            <h3>Sangam Verse</h3>
+                        </div>
+                        <blockquote class="poem-blockquote">
+                            <p class="poem-tamil" id="poem-tamil"></p>
+                            <p class="poem-translation" id="poem-translation"></p>
+                            <footer class="poem-source">
+                                <cite id="poem-source"></cite>
+                            </footer>
+                        </blockquote>
+                    </div>
+
+                    <!-- Interactive Map -->
+                    <div class="map-wrapper" id="map-wrapper">
+                        <h3>Location on Map</h3>
+                        <div id="region-map"></div>
+                    </div>
+
+                    <!-- Location Info -->
                     <div class="location-info">
+                        <span class="location-icon">📌</span>
                         <p id="location-coords"></p>
                     </div>
 
+                    <!-- Share Buttons -->
+                    <div class="share-section">
+                        <h3>Share Your Ainthinai</h3>
+                        <div class="share-buttons">
+                            <button id="share-twitter-btn" class="btn-share btn-twitter" title="Share on X / Twitter">
+                                <span>𝕏</span> Tweet
+                            </button>
+                            <button id="share-copy-btn" class="btn-share btn-copy" title="Copy shareable link">
+                                <span>🔗</span> Copy Link
+                            </button>
+                            <button id="share-image-btn" class="btn-share btn-image" title="Download as image">
+                                <span>📥</span> Save Image
+                            </button>
+                        </div>
+                        <p class="share-feedback" id="share-feedback"></p>
+                    </div>
+
                     <button id="try-another-btn" class="btn btn-outline">
-                        Try Another Location
+                        🔄 Try Another Location
                     </button>
                 </div>
             </section>
@@ -181,16 +235,22 @@
     <!-- Footer -->
     <footer class="footer">
         <div class="container">
+            <p class="footer-brand">ஐந்திணை</p>
             <p>Built with ancient Tamil wisdom and modern web technology</p>
-            <p class="footer-note">Classification based on elevation, distance to coast, and precipitation data</p>
+            <p class="footer-note">Classification based on elevation, distance to coast, and precipitation data · APIs by Open-Meteo & OpenStreetMap</p>
         </div>
     </footer>
 
     <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WPeU=" crossorigin=""></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/terrain-analyzer.js"></script>
     <script src="js/geolocation.js"></script>
     <script src="js/geocoding.js"></script>
+    <script src="js/map.js"></script>
+    <script src="js/share.js"></script>
+    <script src="js/history.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
