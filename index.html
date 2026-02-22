@@ -1,18 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Where Am I in Ainthinai? - Ancient Tamil Geography</title>
-    <meta name="description" content="Discover which of the five Tamil Sangam Ainthinai regions your location belongs to, with cultural poetry and an interactive map.">
+    <meta name="description"
+        content="Discover which of the five Tamil Sangam Ainthinai regions your location belongs to, with cultural poetry and an interactive map.">
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Noto+Serif+Tamil:wght@400;600&display=swap"
+        rel="stylesheet">
     <!-- Leaflet.js CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="">
     <link rel="stylesheet" href="css/styles.css">
 </head>
+
 <body>
     <!-- Hero Section -->
     <header class="hero">
@@ -24,7 +29,8 @@
 
             <div class="intro-text">
                 <p>
-                    <strong>Ainthinai (ஐந்திணை)</strong> is an ancient Tamil classification system from classical Sangam literature that divides the world into five geographical regions,
+                    <strong>Ainthinai (ஐந்திணை)</strong> is an ancient Tamil classification system from classical Sangam
+                    literature that divides the world into five geographical regions,
                     each with unique landscapes, climates, and the emotions of the human heart.
                 </p>
 
@@ -65,13 +71,15 @@
                     <div class="input-option">
                         <div class="option-label">
                             <span class="option-letter">A</span>
-                            <span class="option-title">Allow Location <span class="option-badge">Most Precise</span></span>
+                            <span class="option-title">Allow Location <span class="option-badge">Most
+                                    Precise</span></span>
                         </div>
                         <button id="detect-location-btn" class="btn btn-primary">
                             <span class="btn-icon">📍</span>
                             <span>Detect My Location</span>
                         </button>
-                        <p class="option-hint">We'll automatically detect your exact location using your device's GPS</p>
+                        <p class="option-hint">We'll automatically detect your exact location using your device's GPS
+                        </p>
                     </div>
 
                     <div class="option-divider">
@@ -85,13 +93,8 @@
                             <span class="option-title">Tell Us Where You Are</span>
                         </div>
                         <div class="search-form">
-                            <input
-                                type="text"
-                                id="location-input"
-                                class="input-field"
-                                placeholder="Enter city, address, or landmark..."
-                                aria-label="Location input"
-                            >
+                            <input type="text" id="location-input" class="input-field"
+                                placeholder="Enter city, address, or landmark..." aria-label="Location input">
                             <button id="search-btn" class="btn btn-secondary">
                                 <span>Search</span>
                             </button>
@@ -237,12 +240,13 @@
         <div class="container">
             <p class="footer-brand">ஐந்திணை</p>
             <p>Built with ancient Tamil wisdom and modern web technology</p>
-            <p class="footer-note">Classification based on elevation, distance to coast, and precipitation data · APIs by Open-Meteo & OpenStreetMap</p>
+            <p class="footer-note">Classification based on elevation, distance to coast, and precipitation data · APIs
+                by Open-Meteo & OpenStreetMap</p>
         </div>
     </footer>
 
     <!-- Scripts -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV/XN/WPeU=" crossorigin=""></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="js/api-client.js"></script>
     <script src="js/terrain-analyzer.js"></script>
@@ -253,4 +257,5 @@
     <script src="js/history.js"></script>
     <script src="js/app.js"></script>
 </body>
+
 </html>
